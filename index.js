@@ -8,6 +8,10 @@ const bodyParser=require('body-parser')
 
 const app=express()
 
+//Load routes (ideas)
+const ideas=require('./routes/ideas')
+
+
 //map global promise-get rid of the warning
 mongoose.Promise=global.Promise;
 
@@ -69,105 +73,20 @@ app.get('/',(req,res)=>{
 app.get('/about',(req,res)=>{
     res.render(`about`)
 })
-//Idea index page
-app.get('/ideas',(req,res)=>{
-    Idea.find({})
-    .sort({date:'desc'})
-    .then(ideas=>{
-        res.render(`ideas/index`,{
-            ideas:ideas
-        })
 
-    })
-    
-})
-
-
-
-
-//Add idea form
-app.get('/ideas/add',(req,res)=>{
-    res.render(`ideas/add`)
-})
-//Edit idea form
-app.get('/ideas/edit/:id',(req,res)=>{
-    Idea.findOne({
-        _id:req.params.id
-    })
-    .then(idea=>{
-        res.render(`ideas/edit`,{
-            idea:idea
-        })
-
-    })
-
-    
-})
-
-
-//Process form and we are making a post request
-app.post('/ideas',(req,res)=>{
-   let errors=[]
-   if(!req.body.title){
-       errors.push({text:'Please add a title'})
-   }
-   if(!req.body.details){
-    errors.push({text:'Please add some details'})
-}
-if(errors.length>0){
-    res.render('ideas/add',{
-        errors:errors,
-        title:req.body.title,
-        details:req.body.details
-    })
-} else{
-    
-    const newUser={
-        title:req.body.title,
-        details:req.body.details
-    }
-    new Idea(newUser)
-        .save()
-        .then(idea=>{
-            res.redirect('/ideas') 
-        })
-}
-
-
-})
-//Edit form process and updating it 
-app.put('/ideas/:id',(req,res)=>{
-    Idea.findOne({
-        _id:req.params.id
-    })
-        .then(idea=>{
-            //new values
-            idea.title=req.body.title
-            idea.details=req.body.details
-                idea.save()
-
-                .then(idea=>{
-                    req.flash('success_msg','Added successfully')
-
-                    res.redirect('/ideas')
-                })
-        })
-
-    
-})
-//Delete idea
-app.delete('/ideas/:id',(req,res)=>{
-    Idea.remove({_id: req.params.id})
-    .then(()=>{
-        req.flash('success_msg','removed successfully');
-        res.redirect('/ideas')
-    })
-})
 
 //User login route Traversy
 app.get('/users/login',(req,res)=>{
     res.send('login')
 })
+
+//User register route Traversy
+app.get('/users/register',(req,res)=>{
+    res.send('register')
+})
+
+//Use routes which is in (ideas.js)
+app.use('/ideas',ideas)
 
 
 
